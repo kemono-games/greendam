@@ -32,6 +32,12 @@ server.on('request', function (req, res) {
       return
     }
     if (!!result.headers[`x-oss-meta-${process.env.IS_SENSITIVE_META_NAME}`]) {
+      if (req.headers.referer?.startsWith(process.env.ALLOW_REDIRECT_REFERER)) {
+        const newUri = `${process.env.REDIRECT_DOMAIN}${path}`
+        res.writeHead(301, { Location: uri })
+        res.end()
+        return
+      }
       result.destroy()
       const text = 'Forbidden\n'
       res.writeHead(403, {
