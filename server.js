@@ -33,8 +33,8 @@ server.on('request', function (req, res) {
     }
     if (!!result.headers[`x-oss-meta-${process.env.IS_SENSITIVE_META_NAME}`]) {
       result.destroy()
+      const newUri = `${process.env.REDIRECT_DOMAIN}${path}`
       if (req.headers.referer?.startsWith(process.env.ALLOW_REDIRECT_REFERER)) {
-        const newUri = `${process.env.REDIRECT_DOMAIN}${path}`
         res.writeHead(301, { Location: newUri })
         res.end()
         return
@@ -42,6 +42,7 @@ server.on('request', function (req, res) {
       const text = 'Forbidden\n'
       res.writeHead(403, {
         ...result.headers,
+        'x-kemono-redirect': nerUrl,
         'content-type': 'text/plain',
         'content-length': text.length,
       })
