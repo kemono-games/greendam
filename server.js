@@ -42,7 +42,7 @@ server.on('request', function (req, res) {
       const text = 'Forbidden\n'
       res.writeHead(403, {
         ...result.headers,
-        'x-kemono-redirect': nerUrl,
+        'x-kemono-redirect': newUrl,
         'content-type': 'text/plain',
         'content-length': text.length,
       })
