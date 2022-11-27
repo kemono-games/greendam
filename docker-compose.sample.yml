@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  kemono-games-greendam:
+    image: registry-vpc.cn-guangzhou.aliyuncs.com/kemono/greendam:{{GIT-SHA}}
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    ports:
+      - 8121:3000
+    env_file:
+      - .env

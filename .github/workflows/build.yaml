@@ -1,0 +1,32 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    concurrency:
+      group: build-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: [self-hosted, Intel]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: |
+          GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          docker build -t registry.cn-guangzhou.aliyuncs.com/kemono/greendam:${GIT_HASH} .
+          docker push registry.cn-guangzhou.aliyuncs.com/kemono/greendam:${GIT_HASH}
+
+  deploy-cn:
+    needs: [push]
+    runs-on: [self-hosted, home]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy CN
+        run: |
+          GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          scp docker-compose.sample.yml /tmp/docker-compose.yml
+          sed -i "s/{{GIT-SHA}}/${GIT_HASH}/g" /tmp/docker-compose.yml
+          scp /tmp/docker-compose.yml web02:/root/kemono-games-greendam/
+          ssh web02 "cd /root/kemono-games-greendam && docker compose up -d"
