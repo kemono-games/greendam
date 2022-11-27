@@ -16,7 +16,7 @@ server.on('request', function (req, res) {
     return
   }
 
-  if (req.method !== 'GET' || req.method !== 'HEAD') {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, { 'Content-Type': 'text/plain' })
     res.end('Method not allowed\n')
     return
