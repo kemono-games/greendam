@@ -10,6 +10,12 @@ server.on('listening', function () {
   console.log(`Server running at http://${HOSTNAME}:${PORT}/`)
 })
 server.on('request', function (req, res) {
+  if (req.url === '/health' && req.method === 'HEAD') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end('OK\n')
+    return
+  }
+
   if (req.method !== 'GET') {
     res.writeHead(405, { 'Content-Type': 'text/plain' })
     res.end('Method not allowed\n')
@@ -19,6 +25,12 @@ server.on('request', function (req, res) {
   const path = req.url
   const uri = `${process.env.OSS_ENDPOINT}${path}`
   http.get(uri, (result) => {
+    if (req.method === 'HEAD') {
+      result.destroy()
+      res.writeHead(result.statusCode, result.headers)
+      res.end()
+      return
+    }
     if (!!result.headers[`x-oss-meta-${process.env.IS_SENSITIVE_META_NAME}`]) {
       result.destroy()
       const text = 'Forbidden\n'
